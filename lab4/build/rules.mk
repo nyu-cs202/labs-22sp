@@ -32,7 +32,7 @@ CFLAGS += $(shell $(CC) -fno-stack-protector -E -x c /dev/null >/dev/null 2>&1 &
 DEPCFLAGS = -MD -MF $(DEPSDIR)/$*.d -MP
 
 # Linker flags
-LDFLAGS := $(LDFLAGS) -Os --gc-sections -z max-page-size=0x1000 -static -nostdlib -nostartfiles
+LDFLAGS := $(LDFLAGS) -Os --gc-sections -z max-page-size=0x1000 -static 
 LDFLAGS	+= $(shell $(LD) -m elf_x86_64 --help >/dev/null 2>&1 && echo -m elf_x86_64)
 
 
