@@ -30,7 +30,7 @@
 // Hints:
 //  - You may find it helpful to draw pictures.
 //  - Don't forget to clear any block you allocate.
-//  - Recall that diskaddr() converts from a disk block to an in-memory address
+//  - Recall that diskblock2memaddr() converts from a disk block to an in-memory address
 //  - You may end up writing code with a similar structure three times.
 //  It may simplify your life to factor it into a helper function. 
 int
@@ -74,10 +74,10 @@ inode_create(const char *path, struct inode **pino)
 		return r;
 	if ((r = alloc_block()) < 0)
 		return r;
-	memset(diskaddr(r), 0, BLKSIZE);
+	memset(diskblock2memaddr(r), 0, BLKSIZE);
 	strcpy(d->d_name, name);
 	d->d_inum = r;
-	*pino = diskaddr(d->d_inum);
+	*pino = diskblock2memaddr(d->d_inum);
 	inode_flush(dir);
 	return 0;
 }
@@ -121,7 +121,7 @@ inode_read(struct inode *ino, void *buf, size_t count, uint32_t offset)
 		if (pblkno == NULL || *pblkno == 0)
 			memset(buf, 0, bn);
 		else {
-			blk = diskaddr(*pblkno);
+			blk = diskblock2memaddr(*pblkno);
 			memmove(buf, blk + pos % BLKSIZE, bn);
 		}
 		pos += bn;
@@ -234,19 +234,19 @@ inode_flush(struct inode *ino)
 		if (inode_block_walk(ino, i, &pdiskbno, 0) < 0 ||
 		    pdiskbno == NULL || *pdiskbno == 0)
 			continue;
-		flush_block(diskaddr(*pdiskbno));
+		flush_block(diskblock2memaddr(*pdiskbno));
 	}
 	flush_block(ino);
 	if (ino->i_indirect)
-		flush_block(diskaddr(ino->i_indirect));
+		flush_block(diskblock2memaddr(ino->i_indirect));
 	if (ino->i_double) {
 		// We have to flush every indirect block allocated in
 		// addition to the double-indirect block itself.
-		pdiskbno = diskaddr(ino->i_double);
+		pdiskbno = diskblock2memaddr(ino->i_double);
 		for (i = 0; i < N_INDIRECT; ++i)
 			if (pdiskbno[i])
-				flush_block(diskaddr(pdiskbno[i]));
-		flush_block(diskaddr(ino->i_double));
+				flush_block(diskblock2memaddr(pdiskbno[i]));
+		flush_block(diskblock2memaddr(ino->i_double));
 	}
 }
 
@@ -260,7 +260,7 @@ inode_free(uint32_t inum)
 {
 	struct inode *ino;
 
-	ino = diskaddr(inum);
+	ino = diskblock2memaddr(inum);
 	assert(ino->i_nlink == 0);
 
 	inode_truncate_blocks(ino, 0);

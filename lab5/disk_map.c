@@ -20,10 +20,10 @@ const char		*loaded_mntpoint;
 // Maps a block number to an address.  The pointer returned
 // points to the first byte of the specified block in mapped memory.
 void *
-diskaddr(uint32_t blockno)
+diskblock2memaddr(uint32_t blockno)
 {
 	if (blockno == 0 || (super && blockno >= super->s_nblocks))
-		panic("bad block number %08x in diskaddr", blockno);
+		panic("bad block number %08x in diskblock2memaddr", blockno);
 	return (char *)(diskmap + blockno * BLKSIZE);
 }
 
@@ -55,7 +55,7 @@ map_disk_image(const char *imgname, const char *mntpoint)
 		panic("mmap(%s): %s", imgname, strerror(errno));
 
 	super = (struct superblock *)diskmap; // = diskmap(0)
-	bitmap = diskaddr(1);
+	bitmap = diskblock2memaddr(1);
 
 	loaded_imgname = imgname;
 	loaded_mntpoint = mntpoint;

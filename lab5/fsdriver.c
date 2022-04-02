@@ -298,7 +298,7 @@ fs_rmdir(const char *path)
 
 	if ((r = inode_open(path, &dir)) < 0)
 		return r;
-	if (dir == diskaddr(super->s_root))
+	if (dir == diskblock2memaddr(super->s_root))
 		return -EPERM;
 	if (!S_ISDIR(dir->i_mode))
 		return -ENOTDIR;
@@ -395,7 +395,7 @@ fs_chmod(const char *path, mode_t mode)
 
 	if ((r = inode_open(path, &ino)) < 0)
 		return r;
-	if (ino == diskaddr(super->s_root))
+	if (ino == diskblock2memaddr(super->s_root))
 		return -EPERM;
 	ino->i_mode = mode;
 	ino->i_ctime = time(NULL);
@@ -412,7 +412,7 @@ fs_chown(const char *path, uid_t uid, gid_t gid)
 
 	if ((r = inode_open(path, &ino)) < 0)
 		return r;
-	if (ino == diskaddr(super->s_root))
+	if (ino == diskblock2memaddr(super->s_root))
 		return -EPERM;
 	if (uid != -1)
 		ino->i_owner = uid;
@@ -614,7 +614,7 @@ main(int argc, char **argv)
 
 		// Guarantee that the root directory has proper permissions.
 		// This is vital so that we can unmount the disk.
-		dirroot = diskaddr(super->s_root);
+		dirroot = diskblock2memaddr(super->s_root);
 		dirroot->i_mode = S_IFDIR | 0777;
 
 		fuse_opt_parse(&args, NULL, fs_opts, fs_parse_opt);

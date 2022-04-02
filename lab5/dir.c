@@ -32,7 +32,7 @@ dir_lookup(struct inode *dir, const char *name, struct dirent **dent, struct ino
 		d = (struct dirent*) blk;
 		for (j = 0; j < BLKDIRENTS; j++)
 			if (strcmp(d[j].d_name, name) == 0) {
-				*ino = diskaddr(d[j].d_inum);
+				*ino = diskblock2memaddr(d[j].d_inum);
 				*dent = &d[j];
 				return 0;
 			}
@@ -104,7 +104,7 @@ walk_path(const char *path, struct inode **pdir, struct inode **pino, struct dir
 	// if (*path != '/')
 	//	return -E_BAD_PATH;
 	path = skip_slash(path);
-	ino = diskaddr(super->s_root);
+	ino = diskblock2memaddr(super->s_root);
 	dir = 0;
 	dent = 0;
 	name[0] = 0;
